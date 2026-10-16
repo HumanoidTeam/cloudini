@@ -20,3 +20,4 @@
 /cloudini_foxglove/src/cloudini_wasm_single.js
 /cloudini_foxglove/release/cloudini.foxglove-cloudini-converter-*.foxe
 /.claude/worktrees/
+/cloudini_python/cloudini/*.so

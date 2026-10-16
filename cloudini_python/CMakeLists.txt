@@ -6,17 +6,30 @@ if(DEFINED ENV{CONDA_PREFIX})
   list(APPEND CMAKE_PREFIX_PATH "$ENV{CONDA_PREFIX}")
 endif()
 
+# cloudini_lib: next to this file in a self-contained copy of the package, else the repository's.
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/cloudini_lib/CMakeLists.txt)
+  set(CLOUDINI_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cloudini_lib)
+else()
+  set(CLOUDINI_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../cloudini_lib)
+endif()
+
 # cloudini_lib is linked statically into the extension module.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Use zstd and lz4 from the system when found; download them only as a fallback.
 set(CLOUDINI_FORCE_VENDORED_DEPS OFF CACHE BOOL "Force vendored dependencies")
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../cloudini_lib ${CMAKE_CURRENT_BINARY_DIR}/cloudini_lib EXCLUDE_FROM_ALL)
+add_subdirectory(${CLOUDINI_LIB_DIR} ${CMAKE_CURRENT_BINARY_DIR}/cloudini_lib EXCLUDE_FROM_ALL)
 
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 pybind11_add_module(_cloudini src/cloudini_python.cpp)
 target_link_libraries(_cloudini PRIVATE cloudini::cloudini_lib)
-# Shared zstd/lz4 of the environment: <prefix>/lib from <prefix>/lib/pythonX.Y/site-packages/cloudini.
-set_target_properties(_cloudini PROPERTIES INSTALL_RPATH "$ORIGIN/../../..")
+# Shared zstd/lz4 of the environment, <prefix>/lib, from the module in <prefix>/lib/pythonX.Y/site-packages/cloudini
+# or in <prefix>/cloudini.
+set_target_properties(_cloudini PROPERTIES INSTALL_RPATH "$ORIGIN/../../..:$ORIGIN/../lib" BUILD_WITH_INSTALL_RPATH ON)
 
-install(TARGETS _cloudini LIBRARY DESTINATION cloudini)
+if(SKBUILD)
+  install(TARGETS _cloudini LIBRARY DESTINATION cloudini)
+else()
+  # Plain CMake build: put the module in the package directory, which is then importable as is.
+  set_target_properties(_cloudini PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cloudini)
+endif()

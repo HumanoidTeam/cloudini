@@ -13,3 +13,6 @@ compressed_publisher.publish(compressed_cdr)  # a point_cloud_interfaces/msg/Com
 
 Install: `pip install ./cloudini_python` (zstd and lz4 from the system or the conda environment when found,
 downloaded otherwise).
+
+A plain CMake build (no scikit-build) writes the module into `cloudini/`, which is then importable as is. CMake uses
+`cloudini_lib/` next to `CMakeLists.txt` when a self-contained copy of the package has it, else `../cloudini_lib`.
