@@ -23,6 +23,11 @@ find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 pybind11_add_module(_cloudini src/cloudini_python.cpp)
 target_link_libraries(_cloudini PRIVATE cloudini::cloudini_lib)
+# Link the C++ runtime explicitly: some installers (e.g. Bazel toolchains) link with the C driver (gcc), which
+# does not add it, and the module then fails to import (undefined std:: symbols).
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  target_link_libraries(_cloudini PRIVATE stdc++)
+endif()
 # Shared zstd/lz4 of the environment, <prefix>/lib, from the module in <prefix>/lib/pythonX.Y/site-packages/cloudini
 # or in <prefix>/cloudini.
 set_target_properties(_cloudini PROPERTIES INSTALL_RPATH "$ORIGIN/../../..:$ORIGIN/../lib" BUILD_WITH_INSTALL_RPATH ON)
