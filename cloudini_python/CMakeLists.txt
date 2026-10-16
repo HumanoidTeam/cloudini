@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 project(cloudini_python LANGUAGES C CXX)
 
+# Installers that run CMake themselves may not set a build type: build optimized.
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
 # In a conda/pixi environment, use its pybind11, zstd and lz4.
 if(DEFINED ENV{CONDA_PREFIX})
   list(APPEND CMAKE_PREFIX_PATH "$ENV{CONDA_PREFIX}")
