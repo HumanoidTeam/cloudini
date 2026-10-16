@@ -1,0 +1,28 @@
+[build-system]
+requires = ["scikit-build-core>=0.9", "pybind11>=2.10"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "cloudini"
+version = "1.4.1"
+description = "Python bindings of cloudini_lib: encode and decode Cloudini point clouds (ROS CDR messages)"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Davide Faconti" }]
+requires-python = ">=3.9"
+
+[tool.scikit-build]
+wheel.packages = ["cloudini"]
+cmake.build-type = "Release"
+
+[tool.uv]
+# Rebuild when the C++ sources change too: uv's default cache keys are the project files alone.
+cache-keys = [
+  { file = "pyproject.toml" },
+  { file = "CMakeLists.txt" },
+  { file = "src/**/*.cpp" },
+  { file = "cloudini/**/*.py" },
+  { file = "../cloudini_lib/CMakeLists.txt" },
+  { file = "../cloudini_lib/src/**/*" },
+  { file = "../cloudini_lib/include/**/*" },
+]
